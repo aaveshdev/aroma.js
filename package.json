@@ -1,0 +1,30 @@
+{
+  "name": "aroma.js",
+  "version": "1.0.0",
+  "description": "A lightweight, feature-rich, and developer-friendly web framework to build modern applications with ease.",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test/test-all.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aaveshdev/aroma.js.git"
+  },
+  "keywords": [
+    "web",
+    "framework",
+    "aroma.js",
+    "middleware",
+    "sessions",
+    "routing",
+    "cookies"
+  ],
+  "author": "Aavesh Jilani <aavesh@dragon-lang.org>",
+  "license": "MIT",
+  "dependencies": {
+    "qs": "^6.10.5"
+  },
+  "devDependencies": {
+    "mocha": "^10.2.0"
+  }
+}
