@@ -6,6 +6,7 @@
   "scripts": {
     "test": "node test/test-all.js"
   },
+  "types": "types/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/aaveshdev/aroma.js.git"
