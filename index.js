@@ -120,9 +120,27 @@ class Aroma extends EventEmitter {
             req.query = parsedUrl.query;
             req.path = parsedUrl.pathname;
 
-            res.send = (data) => {
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify(data));
+           res.statusCode = 200;
+
+            res.status = function (statusCode) {
+                this.statusCode = statusCode;
+                return this; // Enables chaining
+            };
+
+            res.json = function (data) {
+                if (!this.statusCode) this.statusCode = 200; 
+                this.setHeader('Content-Type', 'application/json');
+                this.end(JSON.stringify(data));
+            };
+
+             res.send = function (data) {
+                if (!this.statusCode) this.statusCode = 200;
+                if (typeof data === 'object') {
+                    this.setHeader('Content-Type', 'application/json');
+                    this.end(JSON.stringify(data));
+                } else {
+                    this.end(data);
+                }
             };
 
             try {
