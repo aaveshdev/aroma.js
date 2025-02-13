@@ -29,10 +29,31 @@ class Aroma extends EventEmitter {
         return this.settings[setting];
     }
 
-    use(middleware) {
-        this.middlewares.push(middleware);
-    }
+   use(path, middleware) {
+    if (typeof path === 'string' && (middleware instanceof Aroma)) {
+        this.middlewares.push(async (req, res, next) => {
+            const originalPath = req.path;
+            if (req.path.startsWith(path)) {
+                req.path = req.path.slice(path.length) || '/';
+                await processMiddlewares(middleware.middlewares, req, res, middleware.routes);
+                const route = matchRoute(middleware.routes, req);
+                if (route) {
+                    await route.handler(req, res);
+                } else {
+                    next();
+                }
+            } else {
+                next();
+            }
 
+            req.path = originalPath;
+        });
+    } else if (typeof path === 'function') {
+        this.middlewares.push(path);
+    } else {
+        throw new Error('Invalid middleware or path');
+    }
+}
     route(method, path, handler) {
         const paramRegex = /:([^/]+)/g;
         const paramNames = [];
@@ -114,51 +135,58 @@ class Aroma extends EventEmitter {
         this.errorHandlers.push(handler);
     }
 
-    listen(port, callback) {
-        const server = http.createServer(async (req, res) => {
-            const parsedUrl = url.parse(req.url, true);
-            req.query = parsedUrl.query;
-            req.path = parsedUrl.pathname;
+      listen(port, callback) {
+    const server = http.createServer(async (req, res) => {
+        const parsedUrl = url.parse(req.url, true);
+        req.query = parsedUrl.query;
+        req.path = parsedUrl.pathname;
 
-           res.statusCode = 200;
+        res.statusCode = 200;
 
-            res.status = function (statusCode) {
-                this.statusCode = statusCode;
-                return this; // Enables chaining
-            };
+        res.status = function (statusCode) {
+            this.statusCode = statusCode;
+            return this;
+        };
 
-            res.json = function (data) {
-                if (!this.statusCode) this.statusCode = 200; 
+         res.json = function (data) {
+            if (this.headersSent) {
+                return; 
+            }
+
+            if (!this.statusCode) this.statusCode = 200;
+            this.setHeader('Content-Type', 'application/json');
+            this.end(JSON.stringify(data));
+        };
+
+        res.send = function (data) {
+            if (!this.statusCode) this.statusCode = 200;
+            if (typeof data === 'object') {
                 this.setHeader('Content-Type', 'application/json');
                 this.end(JSON.stringify(data));
-            };
-
-             res.send = function (data) {
-                if (!this.statusCode) this.statusCode = 200;
-                if (typeof data === 'object') {
-                    this.setHeader('Content-Type', 'application/json');
-                    this.end(JSON.stringify(data));
-                } else {
-                    this.end(data);
-                }
-            };
-
-            try {
-                await processMiddlewares(this.middlewares, req, res);
-                const route = matchRoute(this.routes, req);
-                if (route) {
-                    await route.handler(req, res);
-                } else {
-                    res.writeHead(404, { 'Content-Type': 'text/plain' });
-                    res.end('404 Not Found');
-                }
-            } catch (err) {
-                await processErrorHandlers(this.errorHandlers, err, req, res);
+            } else {
+                this.end(data);
             }
-        });
+        };
 
-        server.listen(port, callback);
-    }
+        try {
+            await processMiddlewares(this.middlewares, req, res, this.routes);
+
+            const route = matchRoute(this.routes, req);
+            if (route) {
+                await route.handler(req, res);
+            } else {
+                res.writeHead(404, { 'Content-Type': 'text/plain' });
+                res.end('404 Not Found');
+            }
+        } catch (err) {
+            await processErrorHandlers(this.errorHandlers, err, req, res);
+        }
+    });
+     
+
+    server.listen(port, callback);
 }
+
+} 
 
 module.exports = Aroma;

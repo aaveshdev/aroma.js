@@ -1,5 +1,4 @@
-export = Aroma;
-declare class Aroma {
+export default class Aroma {
     routes: any[];
     middlewares: any[];
     errorHandlers: any[];
@@ -7,7 +6,7 @@ declare class Aroma {
     set(setting: any, value: any): void;
     get(setting: any): any;
     get(path: any, handler: any): void;
-    use(middleware: any): void;
+    use(...args: any): void;
     route(method: any, path: any, handler: any): void;
     post(path: any, handler: any): void;
     put(path: any, handler: any): void;
