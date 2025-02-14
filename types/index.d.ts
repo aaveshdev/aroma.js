@@ -25,3 +25,19 @@ export default class Aroma {
     handleErrors(handler: any): void;
     listen(port: any, callback: any): void;
 }
+
+export class Router {
+    routes: any[];
+    middlewares: any[];
+    use(path: any, middleware: any): void;
+    route(method: any, path: any, handler: any): void;
+    get(path: any, handler: any): void;
+    post(path: any, handler: any): void;
+    put(path: any, handler: any): void;
+    delete(path: any, handler: any): void;
+    all(path: any, handler: any): void;
+}
+
+
+exports.Router = { Router};
+
