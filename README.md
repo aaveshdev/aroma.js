@@ -16,6 +16,7 @@ For more information, visit the official website of Aroma.js: [https://aromajs.s
 - [Basic Usage](#basic-usage)
 - [API Documentation](#api-documentation)
   - [Routes](#routes)
+  - [Router](#router)
   - [Middleware](#middleware)
   - [Sessions](#sessions)
   - [Cookies](#cookies)
@@ -28,6 +29,7 @@ For more information, visit the official website of Aroma.js: [https://aromajs.s
 ## Features
 
 - **Routing:** Simple and flexible routing system.
+- **Router:** Modular routing with support for sub-routers
 - **Middleware:** Easily add custom logic between requests and responses.
 - **Sessions:** Manage user sessions with customizable session IDs.
 - **Cookies:** Parse and manage cookies with ease.
@@ -99,6 +101,44 @@ app.get('/path', handler);   // GET request
 app.post('/path', handler);  // POST request
 app.put('/path', handler);   // PUT request
 app.delete('/path', handler); // DELETE request
+```
+
+### Router
+
+Aroma.js provides a Router class for modular routing. You can define routes in a separate file and mount them onto the main application.
+
+#### Create a Router
+
+```javascript
+import { Router } from 'aroma.js';
+
+const router = new Router();
+
+router.get('/', (req, res) => {
+  res.send({ message: 'Hello from Router!' });
+});
+
+router.get('/:id', (req, res) => {
+  res.send({ message: `User ID: ${req.params.id}` });
+});
+
+export default router;
+```
+
+#### Mount the Router
+
+```javascript
+import Aroma from 'aroma.js';
+import userRouter from './routes/user';
+
+const app = new Aroma();
+
+// Mount the router under /users
+app.use('/users', userRouter);
+
+app.listen(3000, () => {
+  console.log('Server is running on http://localhost:3000');
+});
 ```
 
 ### Middleware
