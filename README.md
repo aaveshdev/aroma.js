@@ -226,3 +226,10 @@ app.listen(3000, () => {
 });
 ```
 
+## Support My Work
+
+Aroma.js is an open-source project built with passion to provide developers with a fast and lightweight web framework. If you find this project useful and want to support its continuous development, consider buying me a coffee! ☕  
+
+Your support helps in adding new features, improving performance, and maintaining the project. Every contribution is greatly appreciated!  
+
+[![Buy Me a Coffee](https://img.shields.io/badge/☕-Buy%20Me%20a%20Coffee-orange)](https://www.buymeacoffee.com/aavesh)
