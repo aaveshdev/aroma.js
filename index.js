@@ -1,6 +1,7 @@
 const http = require('http');
 const url = require('url');
 const EventEmitter = require('events');
+const fastQuerystring = require('fast-querystring');
 const { processMiddlewares, matchRoute, processErrorHandlers } = require('./lib/middleware');
 const { serveStatic } = require('./lib/static');
 const { enableTemplateEngine, render } = require('./lib/template');
@@ -48,13 +49,8 @@ class Router {
             paramNames.push(paramName);
             return '([^/]+)';
         });
-
-        this.routes.push({
-            method,
-            path: new RegExp(`^${regexPath}$`),
-            handler,
-            paramNames,
-        });
+        const regex = new RegExp(`^${regexPath}$`);
+        this.routes.push({ method, path: regex, handler, paramNames });
     }
 
     get(path, handler) {
@@ -77,6 +73,8 @@ class Router {
         this.route('*', path, handler);
     }
 }
+
+
 
 class Aroma extends EventEmitter {
     constructor() {
@@ -203,8 +201,8 @@ use(path, middleware) {
 
     listen(port, callback) {
         const server = http.createServer(async (req, res) => {
-            const parsedUrl = url.parse(req.url, true);
-            req.query = parsedUrl.query;
+            const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
+            req.query = fastQuerystring.parse(parsedUrl.search.slice(1)); 
             req.path = parsedUrl.pathname;
 
             res.statusCode = 200;
@@ -214,17 +212,16 @@ use(path, middleware) {
                 return this;
             };
 
-            res.json = function (data) {
-                if (this.headersSent) {
-                    return;
-                }
+                res.json = function (data) {
+                    if (this.writableEnded) return;
+                    this.writeHead(this.statusCode || 200, { 'Content-Type': 'application/json' });
+                    this.end(JSON.stringify(data, null, 0)); 
+                };
 
-                if (!this.statusCode) this.statusCode = 200;
-                this.setHeader('Content-Type', 'application/json');
-                this.end(JSON.stringify(data));
-            };
+
 
             res.send = function (data) {
+                if (this.writableEnded) return;
                 if (!this.statusCode) this.statusCode = 200;
                 if (typeof data === 'object') {
                     this.setHeader('Content-Type', 'application/json');
@@ -234,18 +231,25 @@ use(path, middleware) {
                 }
             };
 
-            try {
-                await processMiddlewares(this.middlewares, req, res, this.routes);
 
+
+            try {
+
+                await processMiddlewares(this.middlewares, req, res, this.routes);
+            
                 const route = matchRoute(this.routes, req);
                 if (route) {
+                     if (!res.writableEnded) {
                     await route.handler(req, res);
+                }
                 } else {
-                    res.writeHead(404, { 'Content-Type': 'text/plain' });
-                    res.end('404 Not Found');
+                     if (!res.writableEnded) {
+                        res.writeHead(404, { 'Content-Type': 'text/plain' });
+                        res.end('404 Not Found');
+                    }
                 }
             } catch (err) {
-                await processErrorHandlers(this.errorHandlers, err, req, res);
+                    await processErrorHandlers(this.errorHandlers, err, req, res);
             }
         });
 

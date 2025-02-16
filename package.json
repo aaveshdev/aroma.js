@@ -26,6 +26,7 @@
   "author": "Aavesh Jilani <aavesh@dragon-lang.org>",
   "license": "MIT",
   "dependencies": {
+    "fast-querystring": "^1.1.2",
     "qs": "^6.10.5"
   },
   "devDependencies": {
