@@ -216,8 +216,7 @@ app.get('/', (req, res) => {
 // Handle errors globally
 app.handleErrors((err, req, res) => {
   console.error(err);
-  res.writeHead(500, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ error: 'Internal Server Error' }));
+  res.send(JSON.stringify({ error: 'Internal Server Error' }));
 });
 
 // Start the server
