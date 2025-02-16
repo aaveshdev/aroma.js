@@ -185,8 +185,7 @@ Handle errors with custom error handlers:
 
 ```javascript
 app.handleErrors((err, req, res) => {
-  res.writeHead(500, { 'Content-Type': 'text/plain' });
-  res.end('Internal Server Error');
+  res.status(500).send('Internal Server Error');
 });
 ```
 
