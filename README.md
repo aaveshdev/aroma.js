@@ -185,8 +185,7 @@ Handle errors with custom error handlers:
 
 ```javascript
 app.handleErrors((err, req, res) => {
-  res.writeHead(500, { 'Content-Type': 'text/plain' });
-  res.end('Internal Server Error');
+  res.status(500).send('Internal Server Error');
 });
 ```
 
@@ -216,8 +215,7 @@ app.get('/', (req, res) => {
 // Handle errors globally
 app.handleErrors((err, req, res) => {
   console.error(err);
-  res.writeHead(500, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ error: 'Internal Server Error' }));
+  res.send(JSON.stringify({ error: 'Internal Server Error' }));
 });
 
 // Start the server
@@ -226,3 +224,10 @@ app.listen(3000, () => {
 });
 ```
 
+## Support My Work
+
+Aroma.js is an open-source project built with passion to provide developers with a fast and lightweight web framework. If you find this project useful and want to support its continuous development, consider buying me a coffee! ☕  
+
+Your support helps in adding new features, improving performance, and maintaining the project. Every contribution is greatly appreciated!  
+
+[![Buy Me a Coffee](https://img.shields.io/badge/☕-Buy%20Me%20a%20Coffee-orange)](https://www.buymeacoffee.com/aavesh)
