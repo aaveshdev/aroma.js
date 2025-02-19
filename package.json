@@ -1,6 +1,6 @@
 {
   "name": "aroma.js",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "A lightweight, feature-rich, and developer-friendly web framework to build modern applications with ease.",
   "scripts": {
     "test": "node test/test-all.js"
