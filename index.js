@@ -94,27 +94,29 @@ class Aroma extends EventEmitter {
     }
 
 use(path, middleware) {
-    if (typeof path === 'string' && (middleware instanceof Router || middleware instanceof Aroma)) {
-        this.middlewares.push(async (req, res, next) => {
-            const originalPath = req.path;
-            if (req.path.startsWith(path)) {
-                req.path = req.path.slice(path.length) || '/';
-                await processMiddlewares(middleware.middlewares, req, res, middleware.routes);
-                const route = matchRoute(middleware.routes, req);
-                if (route) {
-                    await route.handler(req, res);
+    if (!this.middlewares.includes(middleware)) { 
+        if (typeof path === 'string' && (middleware instanceof Router || middleware instanceof Aroma)) {
+            this.middlewares.push(async (req, res, next) => {
+                const originalPath = req.path;
+                if (req.path.startsWith(path)) {
+                    req.path = req.path.slice(path.length) || '/';
+                    await processMiddlewares(middleware.middlewares, req, res, middleware.routes, true);
+                    const route = matchRoute(middleware.routes, req);
+                    if (route) {
+                        await route.handler(req, res);
+                    } else {
+                        next();
+                    }
                 } else {
                     next();
                 }
-            } else {
-                next();
-            }
-            req.path = originalPath;
-        });
-    } else if (typeof path === 'function') {
-        this.middlewares.push(path);
-    } else {
-        throw new Error('Invalid middleware or path');
+                req.path = originalPath;
+            });
+        } else if (typeof path === 'function') {
+            this.middlewares.push(path);
+        } else {
+            throw new Error('Invalid middleware or path');
+        }
     }
 }
 
