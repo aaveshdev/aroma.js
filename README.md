@@ -1,5 +1,5 @@
 <h1>
-  <img src="https://aroma.js.org/logo.png" alt="Aroma.js Logo" width="50" height="50" style="vertical-align: middle; margin-right: 10px; display: flex;"> 
+  <img src="https://aroma.js.org/logo.png" alt="Aroma.js Logo" width="50" height="50" style="vertical-align: middle; margin-right: 10px; display: flex !important;"> 
   Aroma.js
 </h1>
 
