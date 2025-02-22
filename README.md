@@ -1,11 +1,13 @@
-# Aroma.js
+<h1>
+  <img src="https://aroma.js.org/logo.png" alt="Aroma.js Logo" width="50" height="50" style="vertical-align: middle; margin-right: 10px;"> 
+  Aroma.js
+</h1>
 
 Aroma.js is a lightweight, feature-rich, and developer-friendly web framework designed to build modern web applications with ease. It provides essential features like routing, middleware, session management, cookie handling, template rendering, static file serving, and more. With its simple API, it enables rapid development of web applications with flexibility.
 
 ### Website
 
-For more information, visit the official website of Aroma.js: [https://aromajs.suasive.in](https://aromajs.suasive.in)
-
+For more information, visit the official website of Aroma.js: [https://aroma.js.org](https://aroma.js.org)
 
 ## Table of Contents
 
@@ -68,8 +70,8 @@ npm install
 
 Here is a basic example to get started with Aroma.js:
 
-``` javascript
-import Aroma from 'aroma.js';
+```javascript
+import Aroma from "aroma.js";
 
 const app = new Aroma();
 
@@ -80,13 +82,13 @@ app.use((req, res, next) => {
 });
 
 // Simple route
-app.get('/', (req, res) => {
-  res.send({ message: 'Hello, world!' });
+app.get("/", (req, res) => {
+  res.send({ message: "Hello, world!" });
 });
 
 // Start server
 app.listen(3000, () => {
-  console.log('Aroma.js server running on http://localhost:3000');
+  console.log("Aroma.js server running on http://localhost:3000");
 });
 ```
 
@@ -97,10 +99,10 @@ app.listen(3000, () => {
 Define HTTP methods for handling routes.
 
 ```javascript
-app.get('/path', handler);   // GET request
-app.post('/path', handler);  // POST request
-app.put('/path', handler);   // PUT request
-app.delete('/path', handler); // DELETE request
+app.get("/path", handler); // GET request
+app.post("/path", handler); // POST request
+app.put("/path", handler); // PUT request
+app.delete("/path", handler); // DELETE request
 ```
 
 ### Router
@@ -110,15 +112,15 @@ Aroma.js provides a Router class for modular routing. You can define routes in a
 #### Create a Router
 
 ```javascript
-import { Router } from 'aroma.js';
+import { Router } from "aroma.js";
 
 const router = new Router();
 
-router.get('/', (req, res) => {
-  res.send({ message: 'Hello from Router!' });
+router.get("/", (req, res) => {
+  res.send({ message: "Hello from Router!" });
 });
 
-router.get('/:id', (req, res) => {
+router.get("/:id", (req, res) => {
   res.send({ message: `User ID: ${req.params.id}` });
 });
 
@@ -128,16 +130,16 @@ export default router;
 #### Mount the Router
 
 ```javascript
-import Aroma from 'aroma.js';
-import userRouter from './routes/user';
+import Aroma from "aroma.js";
+import userRouter from "./routes/user";
 
 const app = new Aroma();
 
 // Mount the router under /users
-app.use('/users', userRouter);
+app.use("/users", userRouter);
 
 app.listen(3000, () => {
-  console.log('Server is running on http://localhost:3000');
+  console.log("Server is running on http://localhost:3000");
 });
 ```
 
@@ -167,7 +169,10 @@ Sessions are automatically handled, and session data is stored in memory.
 Manage cookies:
 
 ```javascript
-app.manageCookies(res, 'cookieName', 'cookieValue', { httpOnly: true, maxAge: 3600 });
+app.manageCookies(res, "cookieName", "cookieValue", {
+  httpOnly: true,
+  maxAge: 3600,
+});
 ```
 
 ### Template Engine
@@ -176,7 +181,7 @@ Enable the template engine to render dynamic views:
 
 ```javascript
 app.enableTemplateEngine();
-app.render(res, 'view', { data: 'value' });
+app.render(res, "view", { data: "value" });
 ```
 
 ### Error Handling
@@ -185,7 +190,7 @@ Handle errors with custom error handlers:
 
 ```javascript
 app.handleErrors((err, req, res) => {
-  res.status(500).send('Internal Server Error');
+  res.status(500).send("Internal Server Error");
 });
 ```
 
@@ -194,12 +199,12 @@ app.handleErrors((err, req, res) => {
 Here is an example of using Aroma.js to create a basic application with routes, middleware, and static file serving:
 
 ```javascript
-import Aroma from 'aroma.js';
+import Aroma from "aroma.js";
 
 const app = new Aroma();
 
 // Serve static files from 'public' directory
-app.serveStatic('public');
+app.serveStatic("public");
 
 // Middleware to log requests
 app.use((req, res, next) => {
@@ -208,26 +213,26 @@ app.use((req, res, next) => {
 });
 
 // Simple route to handle GET requests to the root
-app.get('/', (req, res) => {
-  res.send({ message: 'Welcome to Aroma.js!' });
+app.get("/", (req, res) => {
+  res.send({ message: "Welcome to Aroma.js!" });
 });
 
 // Handle errors globally
 app.handleErrors((err, req, res) => {
   console.error(err);
-  res.send(JSON.stringify({ error: 'Internal Server Error' }));
+  res.send(JSON.stringify({ error: "Internal Server Error" }));
 });
 
 // Start the server
 app.listen(3000, () => {
-  console.log('Aroma.js server running at http://localhost:3000');
+  console.log("Aroma.js server running at http://localhost:3000");
 });
 ```
 
 ## Support My Work
 
-Aroma.js is an open-source project built with passion to provide developers with a fast and lightweight web framework. If you find this project useful and want to support its continuous development, consider buying me a coffee! ☕  
+Aroma.js is an open-source project built with passion to provide developers with a fast and lightweight web framework. If you find this project useful and want to support its continuous development, consider buying me a coffee! ☕
 
-Your support helps in adding new features, improving performance, and maintaining the project. Every contribution is greatly appreciated!  
+Your support helps in adding new features, improving performance, and maintaining the project. Every contribution is greatly appreciated!
 
 [![Buy Me a Coffee](https://img.shields.io/badge/☕-Buy%20Me%20a%20Coffee-orange)](https://www.buymeacoffee.com/aavesh)
