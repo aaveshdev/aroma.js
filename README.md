@@ -1,4 +1,4 @@
-<h1>
+<h1 style="display: flex;">
   <img src="https://aroma.js.org/logo.png" alt="Aroma.js Logo" width="50" height="50" style="vertical-align: middle; margin-right: 10px;"> 
   Aroma.js
 </h1>
