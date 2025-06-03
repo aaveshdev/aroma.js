@@ -5,6 +5,9 @@
   "scripts": {
     "test": "node test/test-all.js"
   },
+   "bin": {
+    "aroma": "./bin/aroma.js"
+  },
   "types": "types/index.d.ts",
   "repository": {
     "type": "git",

@@ -10,6 +10,7 @@ const { manageSessions, sessions } = require('./lib/session');
 const { parseJson, parseUrlEncoded } = require('./lib/bodyParser');
 const rateLimiter = require('./lib/rateLimiter');
 const logger = require('./lib/logger');
+const { version } = require('./package.json');
 
 class Router {
     constructor() {
@@ -42,35 +43,55 @@ class Router {
         }
     }
 
-    route(method, path, handler) {
-        const paramRegex = /:([^/]+)/g;
-        const paramNames = [];
-        const regexPath = path.replace(paramRegex, (_, paramName) => {
-            paramNames.push(paramName);
-            return '([^/]+)';
-        });
-        const regex = new RegExp(`^${regexPath}$`);
-        this.routes.push({ method, path: regex, handler, paramNames });
+    route(method, path, ...handlers) {
+    const paramRegex = /:([^/]+)/g;
+    const paramNames = [];
+    const regexPath = path.replace(paramRegex, (_, paramName) => {
+        paramNames.push(paramName);
+        return '([^/]+)';
+    });
+
+    this.routes.push({
+        method,
+        path: new RegExp(`^${regexPath}$`),
+        handler: async (req, res) => {
+            let index = 0;
+            const next = async () => {
+                const handler = handlers[index++];
+                if (handler) await handler(req, res, next);
+            };
+            await next();
+        },
+        paramNames
+    });
     }
 
-    get(path, handler) {
-        this.route('GET', path, handler);
+    rateLimiter(options) {
+        rateLimiter(this, options);
     }
 
-    post(path, handler) {
-        this.route('POST', path, handler);
+    logger() {
+        logger(this);
     }
 
-    put(path, handler) {
-        this.route('PUT', path, handler);
+    get(path, ...handlers) {
+        this.route('GET', path, ...handlers);
     }
 
-    delete(path, handler) {
-        this.route('DELETE', path, handler);
+    post(path, ...handlers) {
+        this.route('POST', path, ...handlers);
     }
 
-    all(path, handler) {
-        this.route('*', path, handler);
+    put(path, ...handlers) {
+        this.route('PUT', path, ...handlers);
+    }
+
+    delete(path, ...handlers) {
+        this.route('DELETE', path, ...handlers);
+    }
+
+    all(path, ...handlers) {
+        this.route('*', path, ...handlers);
     }
 }
 
@@ -93,34 +114,34 @@ class Aroma extends EventEmitter {
         return this.settings[setting];
     }
 
-use(path, middleware) {
-    if (!this.middlewares.includes(middleware)) { 
-        if (typeof path === 'string' && (middleware instanceof Router || middleware instanceof Aroma)) {
-            this.middlewares.push(async (req, res, next) => {
-                const originalPath = req.path;
-                if (req.path.startsWith(path)) {
-                    req.path = req.path.slice(path.length) || '/';
-                    await processMiddlewares(middleware.middlewares, req, res, middleware.routes, true);
-                    const route = matchRoute(middleware.routes, req);
-                    if (route) {
-                        await route.handler(req, res);
+    use(path, middleware) {
+        if (!this.middlewares.includes(middleware)) { 
+            if (typeof path === 'string' && (middleware instanceof Router || middleware instanceof Aroma)) {
+                this.middlewares.push(async (req, res, next) => {
+                    const originalPath = req.path;
+                    if (req.path.startsWith(path)) {
+                        req.path = req.path.slice(path.length) || '/';
+                        await processMiddlewares(middleware.middlewares, req, res, middleware.routes, true);
+                        const route = matchRoute(middleware.routes, req);
+                        if (route) {
+                            await route.handler(req, res);
+                        } else {
+                            next();
+                        }
                     } else {
                         next();
                     }
-                } else {
-                    next();
-                }
-                req.path = originalPath;
-            });
-        } else if (typeof path === 'function') {
-            this.middlewares.push(path);
-        } else {
-            throw new Error('Invalid middleware or path');
+                    req.path = originalPath;
+                });
+            } else if (typeof path === 'function') {
+                this.middlewares.push(path);
+            } else {
+                throw new Error('Invalid middleware or path');
+            }
         }
     }
-}
 
-    route(method, path, handler) {
+    route(method, path, ...handlers) {
         const paramRegex = /:([^/]+)/g;
         const paramNames = [];
         const regexPath = path.replace(paramRegex, (_, paramName) => {
@@ -131,29 +152,55 @@ use(path, middleware) {
         this.routes.push({
             method,
             path: new RegExp(`^${regexPath}$`),
-            handler,
-            paramNames,
+            handler: async (req, res) => {
+                let index = 0;
+                const next = async () => {
+                    const handler = handlers[index++];
+                    if (handler) await handler(req, res, next);
+                };
+                await next();
+            },
+            paramNames
         });
     }
 
-    get(path, handler) {
-        this.route('GET', path, handler);
+    get(path, ...handlers) {
+        this.route('GET', path, ...handlers);
     }
 
-    post(path, handler) {
-        this.route('POST', path, handler);
+    post(path, ...handlers) {
+        this.route('POST', path, ...handlers);
     }
 
-    put(path, handler) {
-        this.route('PUT', path, handler);
+    put(path, ...handlers) {
+        this.route('PUT', path, ...handlers);
     }
 
-    delete(path, handler) {
-        this.route('DELETE', path, handler);
+    delete(path, ...handlers) {
+        this.route('DELETE', path, ...handlers);
     }
 
-    all(path, handler) {
-        this.route('*', path, handler);
+    all(path, ...handlers) {
+        this.route('*', path, ...handlers);
+    }
+
+    metrics(path = '/metrics') {
+        let requestCount = 0;
+
+        this.use((req, res, next) => {
+            requestCount++;
+            next();
+        });
+
+        this.get(path, (req, res) => {
+            res.json({
+                status: 'ok',
+                uptime: process.uptime(),
+                memory: process.memoryUsage(),
+                requests: requestCount,
+                timestamp: new Date()
+            });
+        });
     }
 
     serveStatic(staticPath) {
@@ -209,6 +256,8 @@ use(path, middleware) {
 
             res.statusCode = 200;
 
+            res.setHeader('X-Powered-By', `Aroma.js/${version}`);
+
             res.status = function (statusCode) {
                 this.statusCode = statusCode;
                 return this;
@@ -258,6 +307,10 @@ use(path, middleware) {
         server.listen(port, callback);
     }
 }
+
+
+
+
 
 module.exports = Aroma;
 module.exports.Router = Router; 
