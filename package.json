@@ -1,11 +1,11 @@
 {
   "name": "aroma.js",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "description": "A lightweight, feature-rich, and developer-friendly web framework to build modern applications with ease.",
   "scripts": {
     "test": "node test/test-all.js"
   },
-   "bin": {
+  "bin": {
     "aroma": "./bin/aroma.js"
   },
   "types": "types/index.d.ts",
