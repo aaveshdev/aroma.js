@@ -44,26 +44,31 @@ class Router {
     }
 
     route(method, path, ...handlers) {
-    const paramRegex = /:([^/]+)/g;
-    const paramNames = [];
-    const regexPath = path.replace(paramRegex, (_, paramName) => {
-        paramNames.push(paramName);
-        return '([^/]+)';
-    });
+        const paramRegex = /:([^/]+)/g;
+        const paramNames = [];
+        const regexPath = path.replace(paramRegex, (_, paramName) => {
+            paramNames.push(paramName);
+            return '([^/]+)';
+        });
 
-    this.routes.push({
-        method,
-        path: new RegExp(`^${regexPath}$`),
-        handler: async (req, res) => {
-            let index = 0;
-            const next = async () => {
-                const handler = handlers[index++];
-                if (handler) await handler(req, res, next);
-            };
-            await next();
-        },
-        paramNames
-    });
+        const isWildcard = path.endsWith('*');
+        const finalRegexPath = isWildcard
+            ? regexPath.slice(0, -1) + '.*'
+            : `^${regexPath}$`;
+
+        this.routes.push({
+            method,
+            path: new RegExp(isWildcard ? `^${finalRegexPath}` : finalRegexPath),
+            handler: async (req, res) => {
+                let index = 0;
+                const next = async () => {
+                    const handler = handlers[index++];
+                    if (handler) await handler(req, res, next);
+                };
+                await next();
+            },
+            paramNames
+        });
     }
 
     rateLimiter(options) {
@@ -149,9 +154,14 @@ class Aroma extends EventEmitter {
             return '([^/]+)';
         });
 
+        const isWildcard = path.endsWith('*');
+        const finalRegexPath = isWildcard
+            ? regexPath.slice(0, -1) + '.*'
+            : `^${regexPath}$`;
+
         this.routes.push({
             method,
-            path: new RegExp(`^${regexPath}$`),
+            path: new RegExp(isWildcard ? `^${finalRegexPath}` : finalRegexPath),
             handler: async (req, res) => {
                 let index = 0;
                 const next = async () => {
@@ -162,6 +172,8 @@ class Aroma extends EventEmitter {
             },
             paramNames
         });
+
+        
     }
 
     get(path, ...handlers) {
