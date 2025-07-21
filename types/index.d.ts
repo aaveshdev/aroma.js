@@ -17,8 +17,7 @@ export default class Aroma {
     useSessions(): void;
     useCookies(): void;
     manageCookies(res: any, name: any, value: any, options?: {}): void;
-    parseJson(): void;
-    parseUrlEncoded(): void;
+    parseBody(): void;
     rateLimiter(options: any): void;
     logger(): void;
     render(res: any, view: any, data: any): void;

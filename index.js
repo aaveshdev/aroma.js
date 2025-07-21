@@ -7,7 +7,7 @@ const { serveStatic } = require('./lib/static');
 const { enableTemplateEngine, render } = require('./lib/template');
 const { parseCookies, manageCookies } = require('./lib/cookies');
 const { manageSessions, sessions } = require('./lib/session');
-const { parseJson, parseUrlEncoded } = require('./lib/bodyParser');
+const { parseBody } = require('./lib/bodyParser');
 const rateLimiter = require('./lib/rateLimiter');
 const logger = require('./lib/logger');
 const { version } = require('./package.json');
@@ -236,12 +236,8 @@ class Aroma extends EventEmitter {
         manageCookies(res, name, value, options);
     }
 
-    parseJson() {
-        parseJson(this);
-    }
-
-    parseUrlEncoded() {
-        parseUrlEncoded(this);
+    parseBody() {
+        parseBody(this);
     }
 
     rateLimiter(options) {
