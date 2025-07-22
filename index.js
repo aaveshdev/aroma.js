@@ -1,5 +1,4 @@
 const http = require('http');
-const url = require('url');
 const EventEmitter = require('events');
 const fastQuerystring = require('fast-querystring');
 const { processMiddlewares, matchRoute, processErrorHandlers } = require('./lib/middleware');
@@ -11,6 +10,8 @@ const { parseBody } = require('./lib/bodyParser');
 const rateLimiter = require('./lib/rateLimiter');
 const logger = require('./lib/logger');
 const { version } = require('./package.json');
+const path = require('path');
+const fs = require('fs');
 
 class Router {
     constructor() {
@@ -256,6 +257,29 @@ class Aroma extends EventEmitter {
         this.errorHandlers.push(handler);
     }
 
+    mount(dirPath) {
+        const fullPath = path.resolve(process.cwd(), dirPath);
+
+        const load = (folder) => {
+            fs.readdirSync(folder).forEach((file) => {
+                const filePath = path.join(folder, file);
+                const stat = fs.statSync(filePath);
+                if (stat.isDirectory()) {
+                    load(filePath);
+                } else if (file.endsWith(".js") || file.endsWith(".ts")) {
+                    const route = require(filePath);
+                    if (typeof route === "function") {
+                        route(this);
+                    }
+                }
+            });
+        };
+
+        load(fullPath);
+    }
+
+
+
     listen(port, callback) {
         const server = http.createServer(async (req, res) => {
             const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
@@ -264,18 +288,20 @@ class Aroma extends EventEmitter {
 
             res.statusCode = 200;
 
-            res.setHeader('X-Powered-By', `Aroma.js/${version}`);
+            if (this.settings['x-powered-by'] !== false) {
+                res.setHeader('X-Powered-By', `Aroma.js/${version}`);
+            }W
 
             res.status = function (statusCode) {
                 this.statusCode = statusCode;
                 return this;
             };
 
-                res.json = function (data) {
-                    if (this.writableEnded) return;
-                    this.writeHead(this.statusCode || 200, { 'Content-Type': 'application/json' });
-                    this.end(JSON.stringify(data, null, 0)); 
-                };
+            res.json = function (data) {
+                if (this.writableEnded) return;
+                this.writeHead(this.statusCode || 200, { 'Content-Type': 'application/json' });
+                this.end(JSON.stringify(data, null, 0)); 
+            };
 
 
 
@@ -302,8 +328,11 @@ class Aroma extends EventEmitter {
                     await route.handler(req, res);
                 }
                 } else {
-                     if (!res.writableEnded) {
-                        res.writeHead(404, { 'Content-Type': 'text/plain' });
+
+                    if (!res.writableEnded) {
+                        if (this.settings['404']) {
+                            return this.settings['404'](req, res);
+                        }
                         res.end('404 Not Found');
                     }
                 }
@@ -315,8 +344,6 @@ class Aroma extends EventEmitter {
         server.listen(port, callback);
     }
 }
-
-
 
 
 

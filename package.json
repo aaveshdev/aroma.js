@@ -13,6 +13,7 @@
     "type": "git",
     "url": "https://github.com/aaveshdev/aroma.js.git"
   },
+  "homepage": "https://aroma.js.org/",
   "exports": {
     "import": "./aroma.mjs",
     "require": "./aroma.cjs"
@@ -24,7 +25,20 @@
     "middleware",
     "sessions",
     "routing",
-    "cookies"
+    "template-engine",
+    "static-files",
+    "rate-limiting",
+    "logger",
+    "error-handling",
+    "security",
+    "cors",
+    "compression",
+    "cookies",
+    "lightweight",
+    "developer-friendly",
+    "modern",
+    "nodejs",
+    "http"
   ],
   "author": "Aavesh Jilani <aavesh@dragon-lang.org>",
   "license": "MIT",
